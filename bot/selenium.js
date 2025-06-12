@@ -25,6 +25,12 @@ chromeOptions.setUserPreferences({
   'download.default_directory': downloadDir,
   'safebrowsing.enabled': true,
 });
+
+// Acrescentando headless
+chromeOptions.addArguments('--no-sandbox');
+chromeOptions.addArguments('--disable-dev-shm-usage');
+chromeOptions.addArguments('--headless=new'); // para Chrome mais recente
+
 chromeOptions.addArguments('--safebrowsing-disable-download-protection');
 chromeOptions.addArguments('--disable-web-security');
 chromeOptions.addArguments('--allow-running-insecure-content');
