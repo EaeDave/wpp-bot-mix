@@ -4,7 +4,8 @@ const fs = require('fs');
 const path = require('path');
 const { exec } = require('child_process');
 
-const GRUPO_ID = '120363402234740964@g.us';  // Seu grupo
+// const GRUPO_ID = '120363402234740964@g.us';  // Seu grupo
+const GRUPO_ID = '120363405454590223@g.us';  // Seu grupo
 
 function executarAutomacao(codigo) {
     return new Promise((resolve, reject) => {
