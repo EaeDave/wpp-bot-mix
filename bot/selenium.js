@@ -27,9 +27,9 @@ chromeOptions.setUserPreferences({
 });
 
 // Acrescentando headless
-chromeOptions.addArguments('--no-sandbox');
-chromeOptions.addArguments('--disable-dev-shm-usage');
-chromeOptions.addArguments('--headless=new'); // para Chrome mais recente
+// chromeOptions.addArguments('--no-sandbox');
+// chromeOptions.addArguments('--disable-dev-shm-usage');
+// chromeOptions.addArguments('--headless=new'); // para Chrome mais recente
 
 chromeOptions.addArguments('--safebrowsing-disable-download-protection');
 chromeOptions.addArguments('--disable-web-security');
@@ -102,17 +102,23 @@ async function renomearCrdownloadParaPdf(novoNome, timeoutMs = 30000) {
     await btnFiltro.click();
 
     // Filtro de Estoque
+    await driver.wait(until.elementLocated(By.css(classSelectNewFilter)), 10000);
     await driver.findElement(By.css(classSelectNewFilter)).sendKeys('E');
 
     // Maior que 0
+    await driver.wait(until.elementLocated(By.css(classSelectOperator)), 10000);
     await driver.findElement(By.css(classSelectOperator)).sendKeys('m0');
-
+    
     // Adiciona filtro de Fornecedor + o código do fornecedor desejado
+    
+    await driver.wait(until.elementLocated(By.css(classSelectNewFilter)), 10000);
     await driver.findElement(By.css(classSelectNewFilter)).sendKeys(`F${codigoFornecedor}`);
 
     // Aplica o filtro
     const btnApply = await driver.wait(until.elementLocated(By.css(classBtnApply)), 10000);
     await btnApply.click();
+
+    // await driver.sleep(1500);  // Aguarda 1.5ms
 
     // Gera o PDF do MIX
     const btnPDF = await driver.wait(until.elementLocated(By.xpath(xPathPDF)), 10000);
