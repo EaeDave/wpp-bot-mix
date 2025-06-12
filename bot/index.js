@@ -7,7 +7,7 @@ require('chromedriver');
 const { executablePath } = require('puppeteer');
 const { log } = require('console');
 
-const ID_DO_GRUPO = '120363402234740964@g.us';
+const GRUPO_ID = '120363402234740964@g.us';
 
 // Configuração do WhatsApp
 const client = new Client({
@@ -23,12 +23,20 @@ client.on('qr', qr => qrcode.generate(qr, { small: true }));
 client.on('ready', () => console.log('🟢 Bot WhatsApp está pronto!'));
 
 client.on('message', async message => {
-    if (message.from === ID_DO_GRUPO) {
-        const texto = message.body;
-        console.log(`🔊 Mensagem no grupo autorizado: ${texto}`);
-        // Continue aqui com sua lógica de automação
-    } else {
-        console.log(`❌ Ignorando mensagem de outro chat: ${message.from}`);
+    // Filtrar para escutar só o grupo específico
+    if (message.from === GRUPO_ID) {
+        const texto = message.body.trim(); // remove espaços laterais
+
+        // Verifica se contém apenas números
+        const apenasNumeros = /^\d+$/.test(texto);
+
+        if (apenasNumeros) {
+            console.log('✅ Tudo certo');
+            
+        } else {
+            console.log('❌ Mensagem inválida:', texto);
+            await message.reply('⚠️ Por favor, envie apenas o código numérico (sem letras, espaços ou símbolos).');
+        }
     }
 });
 
