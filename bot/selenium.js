@@ -4,7 +4,12 @@ const path = require('path');
 const fs = require('fs');
 require('chromedriver');
 
-const codigoFornecedor = '8784';
+const codigoFornecedor = process.argv[2];
+if (!codigoFornecedor) {
+    console.error('❌ Código do fornecedor não informado!');
+    process.exit(1);
+}
+
 const downloadDir = path.resolve(__dirname, 'downloads');
 
 if (!fs.existsSync(downloadDir)) {

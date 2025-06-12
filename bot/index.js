@@ -6,8 +6,31 @@ const { Builder, By } = require('selenium-webdriver');
 require('chromedriver');
 const { executablePath } = require('puppeteer');
 const { log } = require('console');
+const { exec } = require('child_process');
+const { MessageMedia } = require('whatsapp-web.js');
+
+
 
 const GRUPO_ID = '120363402234740964@g.us';
+
+function executarAutomacao(codigo) {
+    return new Promise((resolve, reject) => {
+        const scriptPath = path.resolve(__dirname, 'selenium.js');
+        const comando = `node "${scriptPath}" ${codigo}`;
+
+        exec(comando, (error, stdout, stderr) => {
+            if (error) {
+                console.error(`Erro ao executar Selenium: ${stderr}`);
+                return reject(error);
+            }
+
+            console.log(`Selenium finalizado:\n${stdout}`);
+            const caminhoPDF = path.join(__dirname, 'downloads', `${codigo}.pdf`);
+            resolve(caminhoPDF);
+        });
+    });
+}
+
 
 // Configuração do WhatsApp
 const client = new Client({
@@ -31,7 +54,35 @@ client.on('message', async message => {
         const apenasNumeros = /^\d+$/.test(texto);
 
         if (apenasNumeros) {
-            console.log('✅ Tudo certo');
+            const codigoFornecedor = texto;
+            await message.reply(`🔄 Código recebido: ${codigoFornecedor}. Iniciando automação...`);
+
+            try {
+                const caminhoPDF = await executarAutomacao(codigoFornecedor);
+
+                if (!fs.existsSync(caminhoPDF)) {
+                await message.reply('⚠️ PDF não encontrado após a automação.');
+                return;
+}
+
+
+
+                if (fs.existsSync(caminhoPDF)) {
+                    const media = MessageMedia.fromFilePath(caminhoPDF);
+                await message.reply(media, undefined, {
+                    caption: `📄 Resultado do código ${codigoFornecedor}`,
+                    sendMediaAsDocument: true
+                });
+
+                    console.log('📤 PDF enviado com sucesso!');
+    } else {
+        await message.reply('⚠️ PDF não foi encontrado após a automação.');
+    }
+} catch (err) {
+    console.error('Erro ao rodar automação:', err);
+    await message.reply('❌ Erro ao gerar o PDF. Verifique os dados ou tente novamente.');
+}
+
             
         } else {
             console.log('❌ Mensagem inválida:', texto);
