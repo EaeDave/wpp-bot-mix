@@ -8,7 +8,8 @@ const { MessageMedia } = require('whatsapp-web.js');
 
 
 
-const GRUPO_ID = '120363402234740964@g.us';
+// const GRUPO_ID = '120363402234740964@g.us';  // OLD
+const GRUPO_ID = '120363405454590223@g.us';
 
 function executarAutomacao(codigo) {
     return new Promise((resolve, reject) => {
@@ -43,6 +44,9 @@ client.on('qr', qr => qrcode.generate(qr, { small: true }));
 client.on('ready', () => console.log('🟢 Bot WhatsApp está pronto!'));
 
 client.on('message', async message => {
+    if (message.isGroupMsg) {
+    console.log("ID do grupo:", message.chatId); // ou message.from
+  }
     // Filtrar para escutar só o grupo específico
     if (message.from === GRUPO_ID) {
         const texto = message.body.trim(); // remove espaços laterais

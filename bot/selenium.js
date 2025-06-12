@@ -38,8 +38,8 @@ chromeOptions.addArguments('--no-sandbox');
 chromeOptions.addArguments('--disable-dev-shm-usage');
 
 const IP_RUB = '10.48.69.146';
-const USUARIO = '5172519';
-const SENHA = 'Prevencao@2026';
+const USUARIO = '5353181';
+const SENHA = 'ZZxpoijkl09?';
 
 const idCampoLogin = 'login-fld-usr';
 const idCampoSenha = 'login-fld-pwd';
