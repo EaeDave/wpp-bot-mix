@@ -59,7 +59,7 @@ client.on('message', async message => {
                 const caminhoPDF = await executarAutomacao(codigoFornecedor);
 
                 if (!fs.existsSync(caminhoPDF)) {
-                await message.reply('⚠️ PDF não encontrado após a automação.');
+                await message.reply(`⚠️ PDF não encontrado, confirme se o código "${codigoFornecedor}" está correto, se estiver. O estoque pode estar zerado.`);
                 return;
 }
 

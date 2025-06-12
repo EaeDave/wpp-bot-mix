@@ -11,128 +11,143 @@ if (!codigoFornecedor) {
 }
 
 const downloadDir = path.resolve(__dirname, 'downloads');
-
 if (!fs.existsSync(downloadDir)) {
-  fs.mkdirSync(downloadDir, { recursive: true });
-  console.log(`📁 Pasta de download criada: ${downloadDir}`);
+    fs.mkdirSync(downloadDir, { recursive: true });
+    console.log(`📁 Pasta de download criada: ${downloadDir}`);
 }
 
 const chromeOptions = new chrome.Options();
+chromeOptions.addArguments('--headless=new');
+chromeOptions.addArguments(
+    '--no-sandbox',
+    '--disable-dev-shm-usage',
+    '--disable-web-security',
+    '--safebrowsing-disable-download-protection',
+    '--allow-running-insecure-content'
+);
 chromeOptions.setUserPreferences({
-  'plugins.always_open_pdf_externally': true,
-  'download.prompt_for_download': false,
-  'download.directory_upgrade': true,
-  'download.default_directory': downloadDir,
-  'safebrowsing.enabled': true,
+    'plugins.always_open_pdf_externally': true,
+    'download.prompt_for_download': false,
+    'download.directory_upgrade': true,
+    'download.default_directory': downloadDir,
+    'safebrowsing.enabled': true,
 });
 
-// Acrescentando headless
-// chromeOptions.addArguments('--no-sandbox');
-// chromeOptions.addArguments('--disable-dev-shm-usage');
-// chromeOptions.addArguments('--headless=new'); // para Chrome mais recente
-
-chromeOptions.addArguments('--safebrowsing-disable-download-protection');
-chromeOptions.addArguments('--disable-web-security');
-chromeOptions.addArguments('--allow-running-insecure-content');
-chromeOptions.addArguments('--no-sandbox');
-chromeOptions.addArguments('--disable-dev-shm-usage');
-
-const IP_RUB = '10.48.69.146';
-const USUARIO = '5353181';
-const SENHA = 'ZZxpoijkl09?';
-
-const idCampoLogin = 'login-fld-usr';
-const idCampoSenha = 'login-fld-pwd';
-const idBtnLogin = 'login-vbtn-loginbtn';
-const idBtnFiltro = 'master-vbtn-optionsdialogopenbutton';
-const classSelectNewFilter = 'select.addNewFilter';
-const classSelectOperator = 'select.operator';
-const classBtnApply = 'a.btnApply';
-const xPathPDF = '//*[@id="mainview"]/div[1]/div/div[1]/div/div[3]/div[3]/ul[2]/li[3]/a';
-
 /**
- * Espera até que um arquivo .crdownload apareça e renomeia ele para {novoNome}.pdf
- * @param {string} novoNome nome final sem extensão
- * @param {number} timeoutMs máximo tempo para esperar (ms)
+ * Delay utilitário
  */
-async function renomearCrdownloadParaPdf(novoNome, timeoutMs = 30000) {
-  const inicio = Date.now();
-
-  while (Date.now() - inicio < timeoutMs) {
-    const arquivos = fs.readdirSync(downloadDir);
-
-    // Procura arquivo .crdownload
-    const crdownloadFile = arquivos.find(f => f.endsWith('.crdownload'));
-
-    if (crdownloadFile) {
-      const caminhoAntigo = path.join(downloadDir, crdownloadFile);
-      const caminhoNovo = path.join(downloadDir, novoNome + '.pdf');
-
-      // Renomeia o arquivo (mesmo que continue incompleto)
-      fs.renameSync(caminhoAntigo, caminhoNovo);
-      console.log(`✅ Arquivo .crdownload renomeado para: ${caminhoNovo}`);
-      return caminhoNovo;
-    }
-
-    // Se não encontrou .crdownload, espera 500ms e tenta de novo
-    await new Promise(r => setTimeout(r, 500));
-  }
-
-  throw new Error('⏳ Timeout esperando arquivo .crdownload aparecer para renomear');
+function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-(async function testSeleniumRUB() {
-  const driver = await new Builder()
-    .forBrowser('chrome')
-    .setChromeOptions(chromeOptions)
-    .build();
+const delayPadrao = 300;
 
+/**
+ * Aguarda até aparecer um .crdownload e renomeia para .pdf
+ */
+async function renomearCrdownloadParaPdf(novoNome, timeoutMs = 30000) {
+    const inicio = Date.now();
+
+    while (Date.now() - inicio < timeoutMs) {
+        const arquivos = fs.readdirSync(downloadDir);
+        const crdownload = arquivos.find(f => f.endsWith('.crdownload'));
+
+        if (crdownload) {
+            const origem = path.join(downloadDir, crdownload);
+            const destino = path.join(downloadDir, `${novoNome}.pdf`);
+            fs.renameSync(origem, destino);
+            console.log(`✅ Arquivo renomeado: ${destino}`);
+            return destino;
+        }
+
+        await delay(delayPadrao);
+    }
+
+    throw new Error('⏳ Timeout: arquivo .crdownload não apareceu a tempo.');
+}
+
+async function fazerLogin(driver) {
+    try {
+        await driver.wait(until.elementLocated(By.id('login-fld-usr')), 10000).sendKeys('5353181');
+        await driver.findElement(By.id('login-fld-pwd')).sendKeys('ZZxpoijkl09?');
+        await driver.findElement(By.id('login-vbtn-loginbtn')).click();
+        console.log('🔐 Login realizado.');
+        await delay(delayPadrao);
+    } catch (err) {
+        throw new Error('Erro durante login: ' + err.message);
+    }
+}
+
+async function aplicarFiltros(driver) {
+    try {
+        await driver.wait(until.elementLocated(By.id('master-vbtn-optionsdialogopenbutton')), 10000).click();
+        console.log('⏳ Botão filtro clicado.');
+        await delay(delayPadrao);
+
+        const selectFiltro = await driver.wait(until.elementLocated(By.css('select.addNewFilter')), 10000);
+        await selectFiltro.sendKeys('E');
+        console.log('⏳ Filtro Estoque selecionado.');
+        await delay(delayPadrao);
+
+        await driver.findElement(By.css('select.operator')).sendKeys('m0');
+        console.log('⏳ Operador "maior que zero" selecionado.');
+        await delay(delayPadrao);
+
+        const filtroFornecedor = await driver.findElement(By.css('select.addNewFilter'));
+        await filtroFornecedor.sendKeys(`F${codigoFornecedor}`);
+        console.log(`⏳ Código do fornecedor "${codigoFornecedor}" inserido.`);
+        await delay(delayPadrao);
+
+        await driver.findElement(By.css('a.btnApply')).click();
+        console.log('🔎 Filtros aplicados.');
+        await delay(delayPadrao);
+    } catch (err) {
+        throw new Error('Erro ao aplicar filtros: ' + err.message);
+    }
+}
+
+const xPathPDF = '//*[@id="mainview"]/div[1]/div/div[1]/div/div[3]/div[3]/ul[2]/li[3]/a';
+
+async function gerarPDF(driver) {
   try {
-    console.log('🔍 Acessando sistema...');
-    await driver.get(`http://${IP_RUB}/vue/#/core/op/produto`);
-
-    // Etapa de login
-    await driver.wait(until.elementLocated(By.id(idCampoLogin)), 10000);
-    await driver.findElement(By.id(idCampoLogin)).sendKeys(USUARIO);
-    await driver.findElement(By.id(idCampoSenha)).sendKeys(SENHA);
-    await driver.findElement(By.id(idBtnLogin)).click();
-
-    // Adicionando filtro
-    const btnFiltro = await driver.wait(until.elementLocated(By.id(idBtnFiltro)), 10000);
-    await btnFiltro.click();
-
-    // Filtro de Estoque
-    await driver.wait(until.elementLocated(By.css(classSelectNewFilter)), 10000);
-    await driver.findElement(By.css(classSelectNewFilter)).sendKeys('E');
-
-    // Maior que 0
-    await driver.wait(until.elementLocated(By.css(classSelectOperator)), 10000);
-    await driver.findElement(By.css(classSelectOperator)).sendKeys('m0');
-    
-    // Adiciona filtro de Fornecedor + o código do fornecedor desejado
-    
-    await driver.wait(until.elementLocated(By.css(classSelectNewFilter)), 10000);
-    await driver.findElement(By.css(classSelectNewFilter)).sendKeys(`F${codigoFornecedor}`);
-
-    // Aplica o filtro
-    const btnApply = await driver.wait(until.elementLocated(By.css(classBtnApply)), 10000);
-    await btnApply.click();
-
-    // await driver.sleep(1500);  // Aguarda 1.5ms
-
-    // Gera o PDF do MIX
+    console.log('⏳ Tentando localizar botão PDF...');
     const btnPDF = await driver.wait(until.elementLocated(By.xpath(xPathPDF)), 10000);
+    console.log('👍 Botão PDF localizado com sucesso.');
+
+    // Pequeno delay para garantir que o botão esteja pronto para clique
+    await delay(delayPadrao);
+
+    console.log('🖱️ Clicando no botão PDF...');
     await btnPDF.click();
 
-    console.log('📥 PDF solicitado. Aguardando arquivo .crdownload...');
-
-    // Espera o .crdownload aparecer e renomeia ele para .pdf
-    await renomearCrdownloadParaPdf(codigoFornecedor);
-
+    console.log('📥 PDF solicitado com sucesso, aguardando download...');
   } catch (err) {
-    console.error('❌ Erro no Selenium:', err);
-  } finally {
-    await driver.quit();
-    console.log('🧹 Navegador fechado.');
+    throw new Error('❌ Erro ao tentar clicar no botão PDF: ' + err.message);
   }
+}
+
+(async function executar() {
+    const IP_RUB = '10.48.69.146';
+    const driver = await new Builder()
+        .forBrowser('chrome')
+        .setChromeOptions(chromeOptions)
+        .build();
+
+    try {
+        console.log('🌐 Acessando o sistema...');
+        await driver.get(`http://${IP_RUB}/vue/#/core/op/produto`);
+
+        await fazerLogin(driver);
+        await aplicarFiltros(driver);
+        await gerarPDF(driver);
+
+        console.log('⏳ Aguardando download...');
+        await renomearCrdownloadParaPdf(codigoFornecedor);
+
+    } catch (err) {
+        console.error('❌ Erro:', err.message);
+    } finally {
+        await driver.quit();
+        console.log('🧹 Navegador fechado.');
+    }
 })();
