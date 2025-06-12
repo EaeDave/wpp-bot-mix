@@ -1,0 +1,18 @@
+{
+  "name": "mix-rub",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "chromedriver": "^137.0.3",
+    "qrcode-terminal": "^0.12.0",
+    "selenium-webdriver": "^4.33.0",
+    "whatsapp-web.js": "^1.30.0"
+  }
+}
