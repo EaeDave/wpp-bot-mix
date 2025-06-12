@@ -2,10 +2,7 @@ const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 const fs = require('fs');
 const path = require('path');
-const { Builder, By } = require('selenium-webdriver');
 require('chromedriver');
-const { executablePath } = require('puppeteer');
-const { log } = require('console');
 const { exec } = require('child_process');
 const { MessageMedia } = require('whatsapp-web.js');
 
