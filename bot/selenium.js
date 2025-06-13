@@ -31,7 +31,7 @@ function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-const delayPadrao = 60;
+const delayPadrao = 80;
 
 async function renomearCrdownloadParaPdf(novoNome, timeoutMs = 30000) {
     const inicio = Date.now();
@@ -84,7 +84,7 @@ async function aplicarFiltros(driver, codigoFornecedor) {
 
 const xPathPDF = '//*[@id="mainview"]/div[1]/div/div[1]/div/div[3]/div[3]/ul[2]/li[3]/a';
 
-async function gerarPDF(driver, tentativas = 3) {
+async function gerarPDF(driver, tentativas = 2) {
   for (let i = 1; i <= tentativas; i++) {
     try {
       console.log(`⏳ Tentando localizar botão PDF... (tentativa ${i})`);
