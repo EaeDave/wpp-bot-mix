@@ -84,78 +84,150 @@ async function aplicarFiltros(driver, codigoFornecedor) {
 
 const xPathPDF = '//*[@id="mainview"]/div[1]/div/div[1]/div/div[3]/div[3]/ul[2]/li[3]/a';
 
-async function gerarPDF(driver, tentativas = 2) {
-  for (let i = 1; i <= tentativas; i++) {
+async function removerFiltroMaiorQueZero(driver) {
     try {
-      console.log(`⏳ Tentando localizar botão PDF... (tentativa ${i})`);
-      const btnPDF = await driver.wait(until.elementLocated(By.xpath(xPathPDF)), 10000);
-      console.log('👍 Botão PDF localizado com sucesso.');
-      await delay(delayPadrao);
-      console.log('🖱️ Clicando no botão PDF...');
-      await btnPDF.click();
-      console.log('📥 PDF solicitado com sucesso, aguardando download...');
-      return; // sucesso, sai da função
-    } catch (err) {
-      console.warn(`⚠️ Tentativa ${i} falhou ao clicar no botão PDF: ${err.message}`);
-      if (i === tentativas) throw err; // lança erro se esgotar as tentativas
-      await delay(1000); // espera um pouco antes da próxima tentativa
+        await driver.wait(until.elementLocated(By.id('master-vbtn-optionsdialogopenbutton')), 10000).click();
+        console.log('⏳ Botão filtro clicado para remover filtro maior que zero.');
+        await delay(delayPadrao);
+
+        const botoes = await driver.findElements(By.css("a.btn"));
+        const botoesDelete = [];
+
+        for (let botao of botoes) {
+            const html = await botao.getAttribute("innerHTML");
+            if (html.includes("#delete")) {
+                botoesDelete.push(botao);
+            }
+        }
+
+        if (botoesDelete.length >= 2) {
+            console.log('🗑️ Clicando no segundo botão de delete...');
+            await botoesDelete[1].click(); // segundo botão
+        } else if (botoesDelete.length === 1) {
+            console.log('🗑️ Só encontrou um botão delete, clicando nele...');
+            await botoesDelete[0].click();
+        } else {
+            console.warn('⚠️ Nenhum botão delete encontrado.');
+        }
+
+        await driver.findElement(By.css('a.btnApply')).click();
+        console.log('🔎 Filtros aplicados após remover filtro maior que zero.');
+        await delay(delayPadrao);
+        await delay(1000);
+
+        try {
+            const btnPDF = await driver.wait(until.elementLocated(By.xpath(xPathPDF)), 5000);
+            console.log('👍 Botão PDF localizado após remover filtro maior que zero.');
+            await delay(delayPadrao);
+            console.log('🖱️ Clicando no botão PDF...');
+            await btnPDF.click();
+            console.log('📥 PDF solicitado com sucesso após remover filtro.');
+            return 'PDF_SOLICITADO';
+        } catch (error) {
+            console.warn('🚫 Botão PDF não encontrado após remover filtro maior que zero.');
+            return 'PDF_NAO_ENCONTRADO';
+        }
+    } catch (e) {
+        console.error('⚠️ Erro ao remover filtro maior que zero:', e.message);
+        return 'ERRO_REMOVER_FILTRO';
     }
-  }
 }
 
+async function gerarPDF(driver, tentativas = 1) {
+    for (let i = 1; i <= tentativas; i++) {
+        try {
+            console.log(`⏳ Tentando localizar botão PDF... (tentativa ${i})`);
+            const btnPDF = await driver.wait(until.elementLocated(By.xpath(xPathPDF)), 1000);
+            console.log('👍 Botão PDF localizado com sucesso.');
+            await delay(delayPadrao);
+            console.log('🖱️ Clicando no botão PDF...');
+            await btnPDF.click();
+            console.log('📥 PDF solicitado com sucesso, aguardando download...');
+            return { status: 'PDF_SOLICITADO' };
+        } catch (err) {
+            console.warn(`⚠️ Tentativa ${i} falhou ao clicar no botão PDF: ${err.message}`);
+
+            if (i === tentativas) {
+                console.log('❌ Todas as tentativas falharam. Tentando remover filtro maior que zero...');
+
+                const resultadoRemocao = await removerFiltroMaiorQueZero(driver);
+
+                if (resultadoRemocao === 'PDF_SOLICITADO') {
+                    return { status: 'ESTOQUE_ZERADO' };
+                } else if (resultadoRemocao === 'PDF_NAO_ENCONTRADO') {
+                    return { status: 'CODIGO_INVALIDO' };
+                } else {
+                    return { status: 'ERRO_REMOVER_FILTRO' };
+                }
+            }
+
+            await delay(1000);
+        }
+    }
+}
 
 async function limparDownloads() {
+    if (!fs.existsSync(downloadDir)) return;
+
     const arquivos = fs.readdirSync(downloadDir);
     for (const arquivo of arquivos) {
-        fs.unlinkSync(path.join(downloadDir, arquivo));
+        try {
+            fs.unlinkSync(path.join(downloadDir, arquivo));
+        } catch (e) {
+            console.warn(`⚠️ Erro ao limpar arquivo ${arquivo}: ${e.message}`);
+        }
     }
-    console.log('🧹 Pasta de downloads limpa.');
+    console.log('🧹 Downloads limpos.');
 }
 
-async function executar(codigoFornecedor) {
+async function executar() {
+    const codigoFornecedor = process.argv[2];
     if (!codigoFornecedor) {
-        throw new Error('Código do fornecedor não informado!');
+        console.error('❌ Código do fornecedor não informado!');
+        console.log(JSON.stringify({ status: 'ERRO', mensagem: 'Código do fornecedor não informado!' }));
+        process.exit(1);
     }
 
     const IP_RUB = '10.48.69.146';
+
     const driver = await new Builder()
         .forBrowser('chrome')
         .setChromeOptions(chromeOptions)
         .build();
 
     try {
-      await limparDownloads();
+        await limparDownloads();
 
-      console.log(`\n🌐 Iniciando processo para código: ${codigoFornecedor}`);
-      await driver.get(`http://${IP_RUB}/vue/#/core/op/produto`);
+        console.log(`\n🌐 Iniciando processo para código: ${codigoFornecedor}`);
 
-      await fazerLogin(driver);
-      await aplicarFiltros(driver, codigoFornecedor);
-      await gerarPDF(driver);
-      await renomearCrdownloadParaPdf(codigoFornecedor);
+        await driver.get(`http://${IP_RUB}/vue/#/core/op/produto`);
 
-      console.log(`✅ Processo concluído para o código: ${codigoFornecedor}`);
+        await fazerLogin(driver);
+        await aplicarFiltros(driver, codigoFornecedor);
+
+        const resultadoPDF = await gerarPDF(driver);
+
+        if (resultadoPDF.status !== 'PDF_SOLICITADO') {
+            // Retorna o status para o index.js interpretar
+            console.log(JSON.stringify(resultadoPDF));
+            return;
+        }
+
+        await renomearCrdownloadParaPdf(codigoFornecedor);
+
+        console.log(`✅ Processo concluído para o código: ${codigoFornecedor}`);
+
+        // Retorna sucesso com caminho do PDF
+        const caminhoPDF = path.join(downloadDir, `${codigoFornecedor}.pdf`);
+        console.log(JSON.stringify({ status: 'SUCESSO', caminhoPDF }));
+
     } catch (err) {
-      console.error(`❌ Erro no código ${codigoFornecedor}:`, err.stack || err.message);
+        console.error(`❌ Erro no código ${codigoFornecedor}:`, err.stack || err.message);
+        console.log(JSON.stringify({ status: 'ERRO', mensagem: err.message }));
     } finally {
-      await driver.quit();
-      console.log('🧹 Navegador fechado.');
-  }
-}
-
-// --- Fila sequencial ---
-
-// Recebe uma lista de códigos via argumentos (separados por vírgula)
-const codigosFornecedores = process.argv[2] ? process.argv[2].split(',') : [];
-
-if (codigosFornecedores.length === 0) {
-    console.error('❌ Informe ao menos um código de fornecedor (separados por vírgula).');
-    process.exit(1);
-}
-
-(async () => {
-    for (const codigo of codigosFornecedores) {
-        await executar(codigo.trim());
+        await driver.quit();
+        console.log('🧹 Navegador fechado.');
     }
-    console.log('\n🏁 Todos os processos finalizados.');
-})();
+}
+
+executar();
