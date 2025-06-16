@@ -84,7 +84,7 @@ async function aplicarFiltros(driver, codigoFornecedor) {
 
 const xPathPDF = '//*[@id="mainview"]/div[1]/div/div[1]/div/div[3]/div[3]/ul[2]/li[3]/a';
 
-async function gerarPDF(driver, tentativas = 2) {
+async function gerarPDF(driver, tentativas = 1) {
   for (let i = 1; i <= tentativas; i++) {
     try {
       console.log(`⏳ Tentando localizar botão PDF... (tentativa ${i})`);
