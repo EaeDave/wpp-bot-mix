@@ -4,9 +4,10 @@ const fs = require('fs');
 const path = require('path');
 const { exec } = require('child_process');
 
-// const GRUPO_ID = '120363402234740964@g.us';  // Seu grupo
-const GRUPO_ID = '120363405454590223@g.us';  // Seu grupo
+// Seu grupo WhatsApp
+const GRUPO_ID = '120363405454590223@g.us';
 
+// Função para executar o selenium.js e gerar o PDF
 function executarAutomacao(codigo) {
     return new Promise((resolve, reject) => {
         const scriptPath = path.resolve(__dirname, 'selenium.js');
@@ -24,34 +25,50 @@ function executarAutomacao(codigo) {
     });
 }
 
-// --- Implementação da fila ---
+// --- Fila de execução ---
 const filaDeExecucao = [];
 let processando = false;
+let clientReady = false;
 
-async function adicionarNaFila(codigo, message) {
-    filaDeExecucao.push({ codigo, message });
-    if (!processando) {
+async function adicionarNaFila(codigo, chatId) {
+    filaDeExecucao.push({ codigo, chatId });
+    if (clientReady && !processando) {
         await processarFila();
     }
 }
 
+// Retry simples para envio de mídia
+async function sendMessageWithRetry(client, chatId, media, options, retries = 3) {
+    for (let attempt = 1; attempt <= retries; attempt++) {
+        try {
+            await client.sendMessage(chatId, media, options);
+            return; // sucesso
+        } catch (error) {
+            if (attempt === retries) throw error;
+            console.warn(`Tentativa ${attempt} de envio de mídia falhou: ${error.message}. Tentando novamente...`);
+            await new Promise(r => setTimeout(r, 2000));
+        }
+    }
+}
+
+// Processa a fila sequencialmente
 async function processarFila() {
     processando = true;
-
     while (filaDeExecucao.length > 0) {
-        const { codigo, message } = filaDeExecucao.shift();
+        const { codigo, chatId } = filaDeExecucao.shift();
 
         try {
-            await message.reply(`🔄 Código recebido: ${codigo}. Iniciando automação...`);
+            await client.sendMessage(chatId, `🔄 Código recebido: ${codigo}. Iniciando automação...`);
+
             const caminhoPDF = await executarAutomacao(codigo);
 
             if (!fs.existsSync(caminhoPDF)) {
-                await message.reply(`⚠️ PDF não encontrado, confirme se o código "${codigo}" está correto ou se o estoque está zerado.`);
+                await client.sendMessage(chatId, `⚠️ PDF não encontrado, confirme se o código "${codigo}" está correto ou se o estoque está zerado.`);
                 continue;
             }
 
             const media = MessageMedia.fromFilePath(caminhoPDF);
-            await message.reply(media, undefined, {
+            await sendMessageWithRetry(client, chatId, media, {
                 caption: `📄 Resultado do código ${codigo}`,
                 sendMediaAsDocument: true,
             });
@@ -59,14 +76,13 @@ async function processarFila() {
             console.log('📤 PDF enviado com sucesso!');
         } catch (err) {
             console.error('Erro ao rodar automação:', err);
-            await message.reply('❌ Erro ao gerar o PDF. Verifique os dados ou tente novamente.');
+            await client.sendMessage(chatId, '❌ Erro ao gerar o PDF. Verifique os dados ou tente novamente.');
         }
     }
-
     processando = false;
 }
 
-// --- Setup WhatsApp ---
+// --- Configuração do client WhatsApp ---
 const client = new Client({
     authStrategy: new LocalAuth(),
     puppeteer: {
@@ -76,21 +92,44 @@ const client = new Client({
     }
 });
 
+// Eventos do client
 client.on('qr', qr => qrcode.generate(qr, { small: true }));
-client.on('ready', () => console.log('🟢 Bot WhatsApp está pronto!'));
 
-client.on('message', async message => {
+client.on('ready', () => {
+    console.log('🟢 Bot WhatsApp está pronto!');
+    clientReady = true;
+
+    // Caso a fila tenha itens antes do ready, processar agora
+    if (!processando && filaDeExecucao.length > 0) {
+        processarFila();
+    }
+});
+
+client.on('auth_failure', () => {
+    console.error('❌ Falha na autenticação!');
+});
+
+client.on('disconnected', (reason) => {
+    console.warn(`⚠️ Cliente desconectado: ${reason}. Tentando reconectar...`);
+    clientReady = false;
+    client.initialize();
+});
+
+// Mensagem recebida
+client.on('message', async (message) => {
     if (message.from === GRUPO_ID) {
         const texto = message.body.trim();
 
         if (/^\d+$/.test(texto)) {
             const codigoFornecedor = texto;
-            await adicionarNaFila(codigoFornecedor, message);
+            console.log('Código recebido:', codigoFornecedor);
+            await adicionarNaFila(codigoFornecedor, message.from);
         } else {
             console.log('❌ Mensagem inválida:', texto);
-            await message.reply('⚠️ Por favor, envie apenas o código numérico (sem letras, espaços ou símbolos).');
+            await client.sendMessage(message.from, '⚠️ Por favor, envie apenas o código numérico (sem letras, espaços ou símbolos).');
         }
     }
 });
 
+// Inicializa o client
 client.initialize();
