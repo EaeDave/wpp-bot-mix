@@ -32,7 +32,7 @@ function delay(ms) {
 }
 // desenvolvedor da automação - eudaverdgs@gmail.com
 
-const delayPadrao = 80;
+const delayPadrao = 150;
 
 async function renomearCrdownloadParaPdf(novoNome, timeoutMs = 30000) {
     // desenvolvedor da automação - eudaverdgs@gmail.com
@@ -54,8 +54,8 @@ async function renomearCrdownloadParaPdf(novoNome, timeoutMs = 30000) {
 
 // LOGIN NO RUB
 async function fazerLogin(driver) {
-    await driver.wait(until.elementLocated(By.id('login-fld-usr')), 10000).sendKeys(''); // COLOCAR ENTRE ASPAS A MATRÍCULA
-    await driver.findElement(By.id('login-fld-pwd')).sendKeys('');  // COLOCAR ENTRE ASPAS A SENHA DO RUB
+    await driver.wait(until.elementLocated(By.id('login-fld-usr')), 10000).sendKeys('5353181'); // COLOCAR ENTRE ASPAS A MATRÍCULA
+    await driver.findElement(By.id('login-fld-pwd')).sendKeys('Obelisco@2025');  // COLOCAR ENTRE ASPAS A SENHA DO RUB
     await driver.findElement(By.id('login-vbtn-loginbtn')).click();
     console.log('🔐 Login realizado.');
     await delay(delayPadrao);
@@ -71,9 +71,14 @@ async function aplicarFiltros(driver, codigoFornecedor) {
     console.log('⏳ Filtro Estoque selecionado.');
     await delay(delayPadrao);
 
-    await driver.findElement(By.css('select.operator')).sendKeys('m0');
+    const maiorQueZero = await driver.wait(until.elementLocated(By.css('select.operator')), 10000);
+    await maiorQueZero.sendKeys('m0');
     console.log('⏳ Operador "maior que zero" selecionado.');
     await delay(delayPadrao);
+
+    // await driver.findElement(By.css()).sendKeys('m0');
+    // console.log('⏳ Operador "maior que zero" selecionado.');
+    // await delay(delayPadrao);
 
     const filtroFornecedor = await driver.findElement(By.css('select.addNewFilter'));
     await filtroFornecedor.sendKeys(`F${codigoFornecedor}`);
@@ -121,7 +126,7 @@ async function executar(codigoFornecedor) {
     }
 
     // COLOQUE O IP DO RUB ENTRE ASPAS, EXEMPLO: '10.48.69.146'
-    const IP_RUB = '';
+    const IP_RUB = '10.48.69.146';
     const driver = await new Builder()
         .forBrowser('chrome')
         .setChromeOptions(chromeOptions)
