@@ -21,6 +21,7 @@ function executarAutomacao(codigo) {
             console.log(`Selenium finalizado:\n${stdout}`);
             const caminhoPDF = path.join(__dirname, 'downloads', `${codigo}.pdf`);
             resolve(caminhoPDF);
+            // desenvolvedor da automação - eudaverdgs@gmail.com
         });
     });
 }
@@ -113,6 +114,7 @@ client.on('disconnected', (reason) => {
     console.warn(`⚠️ Cliente desconectado: ${reason}. Tentando reconectar...`);
     clientReady = false;
     client.initialize();
+    // desenvolvedor da automação - eudaverdgs@gmail.com
 });
 
 // Mensagem recebida

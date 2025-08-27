@@ -11,7 +11,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "chromedriver": "^137.0.3",
+    "chromedriver": "^139.0.0",
     "qrcode-terminal": "^0.12.0",
     "selenium-webdriver": "^4.33.0",
     "whatsapp-web.js": "^1.30.0"

@@ -30,10 +30,12 @@ chromeOptions.setUserPreferences({
 function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
+// desenvolvedor da automação - eudaverdgs@gmail.com
 
 const delayPadrao = 80;
 
 async function renomearCrdownloadParaPdf(novoNome, timeoutMs = 30000) {
+    // desenvolvedor da automação - eudaverdgs@gmail.com
     const inicio = Date.now();
     while (Date.now() - inicio < timeoutMs) {
         const arquivos = fs.readdirSync(downloadDir);
@@ -50,9 +52,10 @@ async function renomearCrdownloadParaPdf(novoNome, timeoutMs = 30000) {
     throw new Error('⏳ Timeout: arquivo .crdownload não apareceu a tempo.');
 }
 
+// LOGIN NO RUB
 async function fazerLogin(driver) {
-    await driver.wait(until.elementLocated(By.id('login-fld-usr')), 10000).sendKeys('5353181');
-    await driver.findElement(By.id('login-fld-pwd')).sendKeys('ZZxpoijkl09?');
+    await driver.wait(until.elementLocated(By.id('login-fld-usr')), 10000).sendKeys(''); // COLOCAR ENTRE ASPAS A MATRÍCULA
+    await driver.findElement(By.id('login-fld-pwd')).sendKeys('');  // COLOCAR ENTRE ASPAS A SENHA DO RUB
     await driver.findElement(By.id('login-vbtn-loginbtn')).click();
     console.log('🔐 Login realizado.');
     await delay(delayPadrao);
@@ -111,13 +114,14 @@ async function limparDownloads() {
     }
     console.log('🧹 Pasta de downloads limpa.');
 }
-
+// desenvolvedor da automação - eudaverdgs@gmail.com
 async function executar(codigoFornecedor) {
     if (!codigoFornecedor) {
         throw new Error('Código do fornecedor não informado!');
     }
 
-    const IP_RUB = '10.48.69.146';
+    // COLOQUE O IP DO RUB ENTRE ASPAS, EXEMPLO: '10.48.69.146'
+    const IP_RUB = '';
     const driver = await new Builder()
         .forBrowser('chrome')
         .setChromeOptions(chromeOptions)
@@ -152,6 +156,7 @@ if (codigosFornecedores.length === 0) {
     console.error('❌ Informe ao menos um código de fornecedor (separados por vírgula).');
     process.exit(1);
 }
+// desenvolvedor da automação - eudaverdgs@gmail.com
 
 (async () => {
     for (const codigo of codigosFornecedores) {
