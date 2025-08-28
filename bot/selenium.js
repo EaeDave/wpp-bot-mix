@@ -141,6 +141,7 @@ async function executar(codigoFornecedor) {
       await fazerLogin(driver);
       await aplicarFiltros(driver, codigoFornecedor);
       await gerarPDF(driver);
+      await delay(3000);  // Delay para aguardar o PDF ser baixado completamente antes de tentar renomeá-lo.
       await renomearCrdownloadParaPdf(codigoFornecedor);
 
       console.log(`✅ Processo concluído para o código: ${codigoFornecedor}`);
