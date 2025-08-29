@@ -128,7 +128,7 @@ client.on('message', async (message) => {
             await adicionarNaFila(codigoFornecedor, message.from);
         } else {
             console.log('❌ Mensagem inválida:', texto);
-            await client.sendMessage(message.from, '⚠️ Por favor, envie apenas o código numérico (sem letras, espaços ou símbolos).');
+            await client.sendMessage(message.from, '⚠️ Por favor, envie apenas um código por mensagem, e o código deve ser numérico (sem letras, espaços ou símbolos).');
         }
     }
 });
