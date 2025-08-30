@@ -106,6 +106,12 @@ client.on('ready', () => {
     }
 });
 
+client.on('authenticated', () => console.log('Sessão autenticada com sucesso.'));
+
+client.on('loading_screen', (percent, message) => {
+    console.log('TELA DE CARREGAMENTO: ', percent, message);
+});
+
 client.on('auth_failure', () => {
     console.error('❌ Falha na autenticação!');
 });
