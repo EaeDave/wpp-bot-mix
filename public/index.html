@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <title>WPP Bot — Painel</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>WPP Bot — Painel</h1>
+    <div class="row" style="flex:0 0 auto; gap:10px">
+      <span id="connState" class="muted">Carregando…</span>
+      <button class="secondary" onclick="document.querySelector('#creditsCard').scrollIntoView({behavior:'smooth'})">Créditos</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="grid">
+
+      <!-- Conexão / QR / Logs -->
+      <div class="card">
+        <h3>Conexão</h3>
+        <div id="qrBox" class="qr-box" style="margin:10px 0;"></div>
+        <div id="savedGroup" class="hidden saved"></div>
+        <div id="storeSaved" class="hidden saved"></div>
+        <div class="panel">
+          <strong>Logs</strong>
+          <pre id="logs" class="logs"></pre>
+        </div>
+      </div>
+
+      <!-- Config da Loja -->
+      <div class="card">
+        <h3>Config da Loja (RUB)</h3>
+        <label>Apelido</label>
+        <input id="storeNameInput" placeholder="Ex.: Loja Centro" />
+        <label>IP do RUB</label>
+        <input id="storeIpInput" placeholder="Ex.: 10.48.69.146" />
+        <div class="row" style="margin-top:10px">
+          <button id="btnSaveIP">Salvar IP</button>
+          <button class="secondary" id="btnClearIP">Limpar</button>
+        </div>
+      </div>
+
+      <!-- Grupo -->
+      <div class="card">
+        <h3>Grupo alvo</h3>
+        <div class="row">
+          <button id="btnKnowId">Já sei o ID</button>
+          <button class="secondary" id="btnDontKnowId">Não sei o ID</button>
+        </div>
+
+        <div id="knowIdPanel" class="hidden panel">
+          <label>ID do grupo <small class="mono">(ex.: 1203...@g.us)</small></label>
+          <input id="groupIdInput" placeholder="1203...@g.us" />
+          <div class="row" style="margin-top:10px">
+            <button id="btnSetGroup">Salvar grupo</button>
+            <button class="secondary" id="btnClearGroup">Limpar salvo</button>
+          </div>
+
+          <label style="margin-top:14px">Ou entrar por convite</label>
+          <input id="inviteInput" placeholder="https://chat.whatsapp.com/XXXX" />
+          <button id="btnJoinInvite" style="margin-top:8px">Entrar pelo convite</button>
+        </div>
+
+        <div id="dontKnowPanel" class="hidden panel">
+          <div class="row">
+            <input id="searchGroup" placeholder="Buscar pelo nome" />
+            <button id="btnReloadGroups" class="secondary" style="flex:0 0 auto">Atualizar</button>
+          </div>
+          <select id="groupsList" size="8" style="margin-top:8px; width:100%"></select>
+          <button id="btnSelectGroup" style="margin-top:8px">Usar grupo selecionado</button>
+        </div>
+      </div>
+
+      <!-- Automação -->
+      <div class="card">
+        <h3>Automação</h3>
+        <label class="row" style="align-items:center">
+          <input type="checkbox" id="autoToggle" style="width:auto;margin-right:8px" />
+          Modo Automático
+        </label>
+        <label style="margin-top:8px">Regex para captar o código</label>
+        <input id="codeRegex" value="^\\d{4,}$" />
+        <button id="btnSaveRegex" style="margin-top:8px">Salvar Regex</button>
+        <hr>
+        <button id="btnSendTest" class="secondary">Enviar mensagem de teste ao grupo</button>
+      </div>
+
+      <!-- Manutenção -->
+      <div class="card">
+        <h3>Manutenção</h3>
+        <label>Quando</label>
+        <input id="maintWhen" placeholder='agora | em 30m | 2025-12-31 22:00' />
+        <label>Mensagem</label>
+        <textarea id="maintMsg" placeholder="🚧 Entraremos em manutenção em DD/MM às HH:mm. Previsão: 30min."></textarea>
+        <label class="row" style="margin-top:8px">
+          <input type="checkbox" id="maintExit" style="width:auto;margin-right:8px" />
+          Encerrar o bot após enviar
+        </label>
+        <div class="row" style="margin-top:10px">
+          <button id="btnMaintNow" class="warn">Avisar agora</button>
+          <button id="btnMaintSchedule">Agendar</button>
+        </div>
+        <small class="mono muted" style="display:block;margin-top:8px">
+          Formatos: <code>agora</code>, <code>em 30m</code>, <code>em 2h</code>, <code>YYYY-MM-DD HH:mm</code>.
+        </small>
+      </div>
+
+      <!-- Sobre & Créditos -->
+      <div class="card" id="creditsCard">
+        <h3>Sobre & Créditos</h3>
+        <div class="saved">
+          <div><strong>Projeto:</strong> WPP Bot</div>
+          <div><strong>Direitos Autorais:</strong> © 2025 Urich — Licença <span class="mono">MIT</span></div>
+        </div>
+
+        <div class="panel">
+          <label><strong>Origem da ideia</strong></label>
+          <div class="muted">Urich — concepção do fluxo, requisitos, visão.</div>
+        </div>
+
+        <div class="panel">
+          <label><strong>Automação (RUB / Selenium)</strong></label>
+          <div class="muted">eudaverdgs@gmail.com — automação inicial.</div>
+          <div class="muted">leozinho.yukih@gmail.com — melhorias e ajustes.</div>
+        </div>
+
+        <div class="panel">
+          <label><strong>Implementações recentes</strong></label>
+          <ul class="muted" style="margin:6px 0 0 18px">
+            <li>Bot terminal + UI (fila, regex, seleção de grupo/IP)</li>
+            <li>Envio de PDF com fallback e 3 tentativas</li>
+            <li>Manutenção agendada (CLI e UI)</li>
+            <li>Robustez no WhatsApp-web.js (cache e timeout)</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+
+    <footer class="muted" style="text-align:center; margin-top:20px">
+      © 2025 Urich — WPP Bot. MIT License.
+    </footer>
+  </main>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

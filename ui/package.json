@@ -1,0 +1,48 @@
+{
+  "name": "mix-rub",
+  "version": "1.0.0",
+  "description": "WPP Bot — código no grupo -> Selenium RUB -> PDF no grupo. CLI e UI.",
+  "license": "MIT",
+  "author": "Urich",
+  "contributors": [
+    {
+      "name": "eudaverdgs",
+      "email": "eudaverdgs@gmail.com",
+      "roles": [
+        "Automação RUB (Selenium)"
+      ]
+    },
+    {
+      "name": "leozinho.yukih",
+      "email": "leozinho.yukih@gmail.com",
+      "roles": [
+        "Melhorias na automação"
+      ]
+    }
+  ],
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "start:ui": "node server.js",
+    "dev": "nodemon index.js",
+    "dev:ui": "nodemon server.js",
+    "start:chrome": "cmd /c \"set PUPPETEER_EXECUTABLE_PATH=C:\\\\Program Files\\\\Google\\\\Chrome\\\\Application\\\\chrome.exe && node index.js\"",
+    "start:ui:chrome": "cmd /c \"set PUPPETEER_EXECUTABLE_PATH=C:\\\\Program Files\\\\Google\\\\Chrome\\\\Application\\\\chrome.exe && node server.js\"",
+    "test": "echo \"no tests\" && exit 0"
+  },
+  "keywords": [],
+  "dependencies": {
+    "chromedriver": "^139.0.0",
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "prompt-sync": "^4.2.0",
+    "qrcode": "^1.5.3",
+    "qrcode-terminal": "^0.12.0",
+    "selenium-webdriver": "^4.33.0",
+    "socket.io": "^4.7.5",
+    "whatsapp-web.js": "github:BenyFilho/whatsapp-web.js#fix_event_ready"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}

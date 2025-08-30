@@ -1,0 +1,180 @@
+/* ========= Design Tokens ========= */
+:root{
+  --bg: #0b0e12;
+  --bg-grad-1: #0b0e12;
+  --bg-grad-2: #0f1520;
+
+  --text: #e7eef5;
+  --muted: #9aa4b2;
+
+  --card: rgba(22, 26, 32, 0.55);
+  --card-border: rgba(255,255,255,0.06);
+
+  --accent: #2563eb;          /* azul principal */
+  --accent-2: #22c55e;        /* verde de apoio */
+  --warn: #f59e0b;
+  --danger: #ef4444;
+  --ghost: #3b4151;
+
+  --ring: rgba(37,99,235,.35);
+  --shadow-1: 0 8px 30px rgba(0,0,0,.28);
+  --shadow-2: 0 3px 12px rgba(0,0,0,.22);
+
+  --radius: 14px;
+  --radius-sm: 10px;
+
+  --grid-gap: 18px;
+
+  --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+/* ========= Base ========= */
+*{ box-sizing:border-box; }
+html, body{ height:100%; }
+body{
+  margin:0;
+  font-family: var(--font);
+  color: var(--text);
+  background:
+    radial-gradient(1200px 800px at 10% -10%, #12223644, transparent 60%),
+    radial-gradient(900px 600px at 110% 20%, #14203833, transparent 60%),
+    linear-gradient(180deg, var(--bg-grad-1), var(--bg-grad-2));
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+
+/* ========= Layout ========= */
+header{
+  display:flex; align-items:center; justify-content:space-between;
+  padding: 18px 22px;
+  border-bottom:1px solid var(--card-border);
+  backdrop-filter: blur(8px) saturate(120%);
+  background: linear-gradient(180deg, rgba(22,25,31,.6), rgba(22,25,31,.25));
+  position: sticky; top:0; z-index: 20;
+}
+h1{ margin:0; font-size: 22px; letter-spacing:.2px; }
+
+main{ max-width: 1160px; margin: 26px auto 24px; padding: 0 18px; }
+
+.grid{
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: var(--grid-gap);
+}
+
+/* ========= Card ========= */
+.card{
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  padding: 16px;
+  box-shadow: var(--shadow-1);
+  backdrop-filter: blur(8px) saturate(120%);
+  transition: transform .06s ease, box-shadow .2s ease, border-color .2s ease;
+}
+.card:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 10px 36px rgba(0,0,0,.33);
+  border-color: rgba(255,255,255,.09);
+}
+.card h3{ margin: 4px 0 10px; font-size: 16px; font-weight: 700; }
+
+/* ========= Text / helpers ========= */
+.muted{ color: var(--muted); }
+.hidden{ display:none !important; }
+small.mono, code, .mono{ font-family: var(--mono); }
+hr{ border:0; border-top:1px solid var(--card-border); margin: 14px 0; }
+
+/* ========= Forms ========= */
+label{
+  display:block;
+  font-size: 12px;
+  color: var(--muted);
+  margin: 8px 0 6px;
+}
+input, select, textarea{
+  width:100%;
+  font-size:14px;
+  color: var(--text);
+  background: rgba(12,14,18,.75);
+  border:1px solid var(--card-border);
+  border-radius: var(--radius-sm);
+  padding: 11px 12px;
+  outline:none;
+  transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+}
+textarea{ resize:vertical; min-height: 76px; }
+input::placeholder, textarea::placeholder{ color: #7b8594; }
+
+input:focus, select:focus, textarea:focus{
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--ring);
+  background: rgba(12,14,18,.95);
+}
+
+/* checkbox */
+input[type="checkbox"]{ width:auto; height:auto; accent-color: var(--accent); }
+
+/* ========= Buttons ========= */
+button{
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  border:0; cursor:pointer; border-radius: 10px;
+  font-weight: 600; letter-spacing:.2px;
+  padding: 11px 14px;
+  color: #fff;
+  background: linear-gradient(180deg, #2b6bef, #2057ca);
+  box-shadow: var(--shadow-2);
+  transition: transform .06s ease, box-shadow .2s ease, opacity .15s ease, filter .15s ease;
+}
+button:hover{ filter: brightness(1.06); }
+button:active{ transform: translateY(1px); }
+button:disabled{ opacity:.6; cursor:not-allowed; }
+
+button.secondary{ background: linear-gradient(180deg, #485165, #3c4456); }
+button.warn{ background: linear-gradient(180deg, #f59e0b, #c07a09); }
+button.danger{ background: linear-gradient(180deg, #ef4444, #c23434); }
+button.ghost{ background: linear-gradient(180deg, #4b5563, #3b4452); }
+
+/* ========= Rows ========= */
+.row{ display:flex; gap: 10px; align-items:center; flex-wrap:wrap; }
+.row > *{ flex: 1 1 auto; min-width: 120px; }
+
+/* ========= QR & Logs ========= */
+.qr-box{
+  background: rgba(11,14,19,.6);
+  border: 1px dashed var(--card-border);
+  border-radius: var(--radius);
+  height: 260px;
+  display:flex; align-items:center; justify-content:center;
+  overflow:hidden;
+}
+.qr-box img{
+  display:block; width: 100%; height:100%; object-fit: contain; image-rendering: pixelated;
+}
+.logs{
+  background: rgba(11,14,19,.65);
+  border:1px solid var(--card-border);
+  border-radius: var(--radius-sm);
+  min-height: 220px; max-height: 360px;
+  overflow:auto; padding: 10px; white-space: pre-wrap;
+}
+
+/* ========= Saved badges ========= */
+.saved{
+  margin-top: 12px;
+  background: rgba(11,14,19,.6);
+  border:1px solid var(--card-border);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+}
+
+/* ========= State text ========= */
+#connState{ color: var(--muted); }
+
+/* ========= Responsive ========= */
+@media (max-width: 460px){
+  main{ padding: 0 14px; }
+  .grid{ gap: 14px; }
+  .card{ padding: 14px; }
+}
