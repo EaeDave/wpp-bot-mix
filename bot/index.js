@@ -3,9 +3,10 @@ const qrcode = require('qrcode-terminal');
 const fs = require('fs');
 const path = require('path');
 const { exec } = require('child_process');
+require('dotenv').config({ path: path.resolve(__dirname, '../.env')});
 
 // Seu grupo WhatsApp
-const GRUPO_ID = '120363405454590223@g.us';
+const GRUPO_ID = process.env.WHATSAPP_GROUP_ID;
 
 // Função para executar o selenium.js e gerar o PDF
 function executarAutomacao(codigo) {
