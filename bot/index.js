@@ -86,8 +86,6 @@ async function processarFila() {
 
 // --- Configuração do client WhatsApp ---
 const client = new Client({
-    authStrategy: new LocalAuth(),
-
     // ↓ ATUALIZAÇÕES AQUI ↓ -----------------------------------------------------------------------------------------------------------
     authStrategy: new LocalAuth({
         clientId: 'mix-rub' // essa parte vai isolar a sessão pra não dar mais aquele bug de cache.
