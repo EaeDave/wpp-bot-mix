@@ -86,7 +86,13 @@ async function processarFila() {
 
 // --- Configuração do client WhatsApp ---
 const client = new Client({
-    authStrategy: new LocalAuth(),
+    // ↓ ATUALIZAÇÕES AQUI ↓ -----------------------------------------------------------------------------------------------------------
+    authStrategy: new LocalAuth({
+        clientId: 'mix-rub' // essa parte vai isolar a sessão pra não dar mais aquele bug de cache.
+    }),                                                                                                            // Deixa o like kkkkkkkkk
+    webVersionCache: { type: 'none' }, // desativa cache da versão do WA Web deixando mais limpo. Mas recomendo fazer testes primeiro.
+    // ↑ FECHA ATUALIZAÇÃO AQUI ↑  ----------------------------------------------------------------------------------------------------
+
     puppeteer: {
         executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
         headless: true,
